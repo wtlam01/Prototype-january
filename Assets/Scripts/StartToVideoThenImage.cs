@@ -6,7 +6,7 @@ public class StartToVideoThenImage : MonoBehaviour
 {
     [Header("UI")]
     public Button startButton;
-    public GameObject startButtonObject; // optional: same as button gameObject
+    public GameObject startButtonObject;
     public GameObject videoRawImageObject;
     public GameObject studyRoomImageObject;
 
@@ -14,24 +14,23 @@ public class StartToVideoThenImage : MonoBehaviour
     public VideoPlayer videoPlayer;
     public string videoUrl = "https://w33lam.panel.uwe.ac.uk/Video/1_1.mp4";
 
+    private bool hasFinishedIntro = false;
+
     private void Awake()
     {
-        // Initial state
-        if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
-        if (studyRoomImageObject != null) studyRoomImageObject.SetActive(false);
+        // 初始狀態
+        if (videoRawImageObject) videoRawImageObject.SetActive(false);
+        if (studyRoomImageObject) studyRoomImageObject.SetActive(false);
 
-        // Hook button
         if (startButton != null)
             startButton.onClick.AddListener(OnStartClicked);
 
-        // When video finishes
         if (videoPlayer != null)
             videoPlayer.loopPointReached += OnVideoFinished;
     }
 
     private void OnDestroy()
     {
-        // Clean up
         if (startButton != null)
             startButton.onClick.RemoveListener(OnStartClicked);
 
@@ -41,22 +40,20 @@ public class StartToVideoThenImage : MonoBehaviour
 
     private void OnStartClicked()
     {
-        // Hide start UI
-        if (startButtonObject != null) startButtonObject.SetActive(false);
-        else if (startButton != null) startButton.gameObject.SetActive(false);
+        if (hasFinishedIntro) return;
 
-        // Show video display
-        if (videoRawImageObject != null) videoRawImageObject.SetActive(true);
+        if (startButtonObject) startButtonObject.SetActive(false);
+        else if (startButton) startButton.gameObject.SetActive(false);
 
-        // Prepare and play
-        if (videoPlayer != null)
-        {
-            videoPlayer.source = VideoSource.Url;
-            videoPlayer.url = videoUrl;
+        if (videoRawImageObject) videoRawImageObject.SetActive(true);
+        if (studyRoomImageObject) studyRoomImageObject.SetActive(false);
 
-            videoPlayer.Prepare();
-            videoPlayer.prepareCompleted += OnPrepared;
-        }
+        videoPlayer.Stop();
+        videoPlayer.source = VideoSource.Url;
+        videoPlayer.url = videoUrl;
+
+        videoPlayer.Prepare();
+        videoPlayer.prepareCompleted += OnPrepared;
     }
 
     private void OnPrepared(VideoPlayer vp)
@@ -67,10 +64,14 @@ public class StartToVideoThenImage : MonoBehaviour
 
     private void OnVideoFinished(VideoPlayer vp)
     {
-        // Hide video view
-        if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
+        if (hasFinishedIntro) return;
+        hasFinishedIntro = true;
 
-        // Show final image
-        if (studyRoomImageObject != null) studyRoomImageObject.SetActive(true);
+        // 第一段播完 -> 出四按鈕畫面
+        if (videoRawImageObject) videoRawImageObject.SetActive(false);
+        if (studyRoomImageObject) studyRoomImageObject.SetActive(true);
+
+        // ⭐最重要：之後唔再干涉其他影片
+        this.enabled = false;
     }
 }
