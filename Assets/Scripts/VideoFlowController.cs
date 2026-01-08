@@ -28,13 +28,7 @@ public class VideoFlowController : MonoBehaviour
     private int clickCount = 0;
     private bool paused = false;
 
-    void Start()
-    {
-        videoRawImage.gameObject.SetActive(false);
-        clickAdvanceUI.SetActive(false);
-        progressSlider.maxValue = requiredClicks;
-        progressSlider.value = 0;
-    }
+
 
     // 🔘 Start / Keep Studying button
     public void StartStudyingSequence()
